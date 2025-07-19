@@ -103,6 +103,9 @@ const Dashboard = () => {
 
       toast.success("logout successful");
       Promise.resolve().then(() => {
+        localStorage.removeItem("emograph-user");
+      });
+      Promise.resolve().then(() => {
         router.push("/auth-sign-in");
       });
     } catch (error) {
