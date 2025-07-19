@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heart, BarChart3, Brain, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const Home = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
-
   return (
     <div className="min-h-screen gradient-background-bg">
       {/* Header */}
@@ -22,12 +19,9 @@ const Home = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" onClick={() => setIsSignUp(false)}>
-              Sign In
-            </Button>
-            <Button className="hero-button" onClick={() => setIsSignUp(true)}>
-              Get Started
-            </Button>
+            <Link href={"/auth/sign-in"}>
+              <Button variant="ghost">Sign In</Button>
+            </Link>
           </div>
         </nav>
       </header>
@@ -55,12 +49,6 @@ const Home = () => {
                 Start Your Journey <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              className="text-lg px-10 py-6 bg-white/50 backdrop-blur-sm"
-            >
-              Watch Demo
-            </Button>
           </div>
         </div>
 
@@ -146,9 +134,11 @@ const Home = () => {
           <p className="text-xl text-foreground/80 mb-8">
             Join thousands of users discovering their emotional patterns
           </p>
-          <Button className="hero-button w-auto text-xl px-12 py-6">
-            Create Free Account <ArrowRight className="ml-2 w-6 h-6" />
-          </Button>
+          <Link href={"/auth/sign-up"}>
+            <Button className="hero-button w-auto text-xl px-12 py-6">
+              Create Free Account <ArrowRight className="ml-2 w-6 h-6" />
+            </Button>
+          </Link>
         </div>
       </main>
 
