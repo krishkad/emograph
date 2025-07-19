@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heart, BarChart3, Brain, Sparkles, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const Home = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -19,7 +20,7 @@ const Home = () => {
             </div>
             <span className="text-2xl font-bold gradient-text">EmoGraph</span>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <Button variant="ghost" onClick={() => setIsSignUp(false)}>
               Sign In
@@ -39,20 +40,25 @@ const Home = () => {
               <Sparkles className="w-10 h-10 text-white" />
             </div>
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text">
             Track Your Emotions
           </h1>
           <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto">
-            Discover patterns in your mood with AI-powered insights. 
-            Build emotional awareness one day at a time.
+            Discover patterns in your mood with AI-powered insights. Build
+            emotional awareness one day at a time.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button className="hero-button text-lg px-10 py-6">
-              Start Your Journey <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <Button variant="outline" className="text-lg px-10 py-6 bg-white/50 backdrop-blur-sm">
+            <Link href={`/dashboard`}>
+              <Button className="hero-button text-lg px-10 py-6">
+                Start Your Journey <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              className="text-lg px-10 py-6 bg-white/50 backdrop-blur-sm"
+            >
               Watch Demo
             </Button>
           </div>
@@ -84,7 +90,9 @@ const Home = () => {
             <div className="w-16 h-16 gradient-bad-bg rounded-2xl flex items-center justify-center mx-auto mb-6">
               <BarChart3 className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-4">Beautiful Visualizations</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              Beautiful Visualizations
+            </h3>
             <p className="text-foreground/70">
               See your emotional journey through stunning charts and graphs.
             </p>
@@ -94,13 +102,19 @@ const Home = () => {
         {/* Demo Section */}
         <div className="py-20">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 gradient-text">See It In Action</h2>
-            <p className="text-xl text-foreground/80">Experience the simplicity of emotion tracking</p>
+            <h2 className="text-4xl font-bold mb-4 gradient-text">
+              See It In Action
+            </h2>
+            <p className="text-xl text-foreground/80">
+              Experience the simplicity of emotion tracking
+            </p>
           </div>
-          
+
           <Card className="glass-card p-8 max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold mb-6 text-center">How are you feeling today?</h3>
-            
+            <h3 className="text-xl font-semibold mb-6 text-center">
+              How are you feeling today?
+            </h3>
+
             <div className="flex justify-center space-x-8 mb-8">
               <button className="emotion-button emotion-button-good">
                 <span className="text-3xl">😊</span>
@@ -112,23 +126,23 @@ const Home = () => {
                 <span className="text-3xl">😔</span>
               </button>
             </div>
-            
+
             <div className="space-y-4">
-              <textarea 
-                className="w-full p-4 rounded-xl border bg-white/50 backdrop-blur-sm resize-none" 
+              <textarea
+                className="w-full p-4 rounded-xl border bg-white/50 backdrop-blur-sm resize-none"
                 placeholder="What's on your mind today?"
                 rows={3}
               />
-              <Button className="w-full hero-button">
-                Log My Emotion
-              </Button>
+              <Button className="w-full hero-button">Log My Emotion</Button>
             </div>
           </Card>
         </div>
 
         {/* Call to Action */}
         <div className="text-center py-20">
-          <h2 className="text-4xl font-bold mb-6 gradient-text">Ready to Start Your Journey?</h2>
+          <h2 className="text-4xl font-bold mb-6 gradient-text">
+            Ready to Start Your Journey?
+          </h2>
           <p className="text-xl text-foreground/80 mb-8">
             Join thousands of users discovering their emotional patterns
           </p>

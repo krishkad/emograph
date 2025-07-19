@@ -1,49 +1,147 @@
-"use client"
+"use client";
 
-
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, BarChart3, Calendar, TrendingUp, User, LogOut } from "lucide-react";
+import {
+  filterLogsCreatedToday,
+  getDominantEmotion,
+  getEmojiWithEmotion,
+  GetLogTime,
+} from "@/lib/utils";
+import { Emonote } from "@prisma/client";
+import {
+  Calendar,
+  Heart,
+  LogOut,
+  TrendingUp
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const Dashboard = () => {
-  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
-  const [getEmotion, setGetEmotion] = useState<string | null>(null);
+  const [currentEmotion, setCurrentEmotion] = useState<string | null>(null);
+  const [logEmotionLoading, setlogEmotionLoading] = useState<boolean>(false);
+  const [currentEmotionData, setCurrentEmotionData] = useState<{
+    emotion: string;
+    emoji: string;
+  } | null>(null);
   const [emotionText, setEmotionText] = useState("");
-  const [todayEntries] = useState([
-    { time: "9:00 AM", emotion: "😊", text: "Feeling great to start the day!", category: "good" },
-    { time: "2:00 PM", emotion: "😐", text: "Work is getting a bit stressful", category: "neutral" },
-  ]);
+  const [dominatingEmotion, setDominatingEmotion] = useState<
+    "good" | "neutral" | "sad" | undefined
+  >("neutral");
 
+  const [todaysEmotions, setTodaysEmotions] = useState<Emonote[] | null>(null);
+  const router = useRouter();
   const emotions = [
     { emoji: "😊", label: "Good", value: "good", class: "emotion-button-good" },
-    { emoji: "😐", label: "Neutral", value: "neutral", class: "emotion-button-neutral" },
+    {
+      emoji: "😐",
+      label: "Neutral",
+      value: "neutral",
+      class: "emotion-button-neutral",
+    },
     { emoji: "😔", label: "Bad", value: "bad", class: "emotion-button-bad" },
   ];
 
-  const handleSubmit = () => {
-    if (selectedEmotion && emotionText.trim()) {
-      // Here we would normally send to backend/AI analysis
-      console.log("Emotion logged:", { emotion: selectedEmotion, text: emotionText });
-      setSelectedEmotion(null);
+  const handleSubmit = async () => {
+    if (emotionText.length <= 0) return;
+    setlogEmotionLoading(true);
+    try {
+      const userString = localStorage.getItem("emograph-user");
+
+      if (!userString) return;
+      const user = JSON.parse(userString); // Convert string to object
+      const userId = user.id;
+      console.log({ userId });
+
+      const response = await fetch("/api/create-emo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          message: emotionText,
+          userId,
+        }),
+      });
+
+      const res = await response.json();
+
+      if (!res.success) {
+        setlogEmotionLoading(false);
+        toast("failed to create emo");
+        setCurrentEmotion(null);
+        setCurrentEmotionData(null);
+        return;
+      }
+
+      setCurrentEmotion(res.data);
+
+      const currentEmoji =
+        res.data === "happy" ? "😊" : res.data === "neutral" ? "😐" : "😔";
+      setCurrentEmotionData({ emotion: res.data, emoji: currentEmoji });
+      toast.success("Emo created successfully");
+      todaysEmotions?.push(res.emoNote);
+      // setTodaysEmotions(todaysEmotions);
+    } catch (error) {
+      toast("failed to create emo");
+      console.log(error);
+    } finally {
+      setlogEmotionLoading(false);
       setEmotionText("");
+    }
+  };
+
+  const handleLogOut = async () => {
+    try {
+      const response = await fetch("/api/auth/sign-out");
+
+      const res = await response.json();
+
+      if (!res.success) {
+        toast.warning("failed to logout");
+        return;
+      }
+
+      toast.success("logout successful");
+      router.push("/auth/sign-in");
+    } catch (error) {
+      toast.warning("failed to logout");
     }
   };
 
   useEffect(() => {
     const getEmotions = async () => {
-        const response = await fetch("/api/get-emotions");
+      const response = await fetch("/api/get-my-emotions", {
+        method: "GET",
+        credentials: "include",
+      });
 
-        const res = await response.json();
+      const res = await response.json();
+      const todaysArray = filterLogsCreatedToday(res.data);
+      setTodaysEmotions(todaysArray);
+    };
 
-        console.log({res});
-        setGetEmotion(res.data);
+    getEmotions();
+  }, []);
 
-    }
+  useEffect(() => {
+    if (
+      todaysEmotions === null ||
+      todaysEmotions.length <= 0 ||
+      todaysEmotions === undefined
+    )
+      return;
 
-    getEmotions()
-  }, [])
+    const data = getDominantEmotion(todaysEmotions);
+
+    if (data === undefined) return;
+    setDominatingEmotion(data?.emotion as "good" | "neutral" | "sad");
+    console.log({ todaysEmotions });
+  }, [todaysEmotions]);
 
   return (
     <div className="min-h-screen gradient-background-bg">
@@ -57,13 +155,13 @@ const Dashboard = () => {
               </div>
               <span className="text-xl font-bold gradient-text">EmoGraph</span>
             </div>
-            
+
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
+              {/* <Button variant="ghost" size="sm">
                 <User className="w-4 h-4 mr-2" />
                 Profile
-              </Button>
-              <Button variant="ghost" size="sm">
+              </Button> */}
+              <Button variant="ghost" size="sm" onClick={handleLogOut}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
               </Button>
@@ -84,44 +182,59 @@ const Dashboard = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Emotion Input Card */}
             <Card className="glass-card p-8">
-              <h2 className="text-2xl font-semibold mb-6 text-center">Log Your Current Mood</h2>
-              
+              <h2 className="text-2xl font-semibold mb-6 text-center">
+                Log Your Mood
+              </h2>
+
               {/* Emotion Selection */}
-              <div className="flex justify-center space-x-8 mb-8">
-                {emotions.map((emotion) => (
+              {currentEmotion ? (
+                <div className="flex justify-center space-x-8 mb-8">
                   <button
-                    key={emotion.value}
-                    className={`emotion-button ${emotion.class} ${
-                      selectedEmotion === emotion.value ? 'ring-4 ring-primary/50 scale-110' : ''
-                    }`}
-                    onClick={() => setSelectedEmotion(emotion.value)}
+                    className={`emotion-button ${
+                      currentEmotion && "scale-200"
+                    }  `}
                   >
-                    <span className="text-4xl">{emotion.emoji}</span>
+                    <span className="text-4xl">
+                      {getEmojiWithEmotion(currentEmotion)}
+                    </span>
                   </button>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="flex justify-center space-x-8 mb-8">
+                  {emotions.map((emotion) => (
+                    <button
+                      key={emotion.value}
+                      className={`emotion-button ${emotion.class} `}
+                    >
+                      <span className="text-4xl">{emotion.emoji}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Selected Emotion Display */}
-              {selectedEmotion && (
+              {currentEmotion && currentEmotionData && (
                 <div className="text-center mb-6 fade-in">
                   <p className="text-lg font-medium">
-                    You selected: <span className="capitalize">{selectedEmotion}</span> {emotions.find(e => e.value === selectedEmotion)?.emoji}
+                    You're {currentEmotion} now!
                   </p>
                 </div>
               )}
 
               {/* Text Input */}
               <div className="space-y-4">
-                <label className="block text-sm font-medium">What's on your mind?</label>
+                <label className="block text-sm font-medium">
+                  What's on your mind?
+                </label>
                 <Textarea
                   value={emotionText}
                   onChange={(e) => setEmotionText(e.target.value)}
                   placeholder="Describe how you're feeling today..."
                   className="min-h-[120px] bg-white/50 backdrop-blur-sm border-white/30"
                 />
-                <Button 
+                <Button
                   onClick={handleSubmit}
-                  disabled={!selectedEmotion || !emotionText.trim()}
+                  disabled={!emotionText.trim() || logEmotionLoading}
                   className="w-full hero-button"
                 >
                   Log My Emotion
@@ -135,26 +248,41 @@ const Dashboard = () => {
                 <h3 className="text-xl font-semibold">Today's Entries</h3>
                 <Calendar className="w-5 h-5 text-foreground/60" />
               </div>
-              
+
               <div className="space-y-4">
-                {todayEntries.map((entry, index) => (
-                  <div key={index} className="flex items-start space-x-4 p-4 bg-white/30 rounded-xl">
-                    <span className="text-2xl">{entry.emotion}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-foreground/80">{entry.time}</span>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          entry.category === 'good' ? 'bg-emotion-good-light text-emotion-good' :
-                          entry.category === 'neutral' ? 'bg-emotion-neutral-light text-emotion-neutral' :
-                          'bg-emotion-bad-light text-emotion-bad'
-                        }`}>
-                          {entry.category}
-                        </span>
+                {todaysEmotions &&
+                  todaysEmotions.length > 0 &&
+                  todaysEmotions.map((entry, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start space-x-4 p-4 bg-white/30 rounded-xl"
+                    >
+                      <span className="text-2xl">
+                        {getEmojiWithEmotion(entry.emotions)}
+                      </span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-foreground/80">
+                            {GetLogTime(entry.createdAt)}
+                          </span>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              entry.emotions === "good"
+                                ? "bg-emotion-good-light text-emotion-good"
+                                : entry.emotions === "neutral"
+                                ? "bg-emotion-neutral-light text-emotion-neutral"
+                                : "bg-emotion-bad-light text-emotion-bad"
+                            }`}
+                          >
+                            {entry.emotions}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground/70">
+                          {entry.description}
+                        </p>
                       </div>
-                      <p className="text-sm text-foreground/70">{entry.text}</p>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </Card>
           </div>
@@ -169,51 +297,80 @@ const Dashboard = () => {
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/70">Entries logged</span>
-                  <span className="font-semibold">2</span>
+                  <span className="text-sm text-foreground/70">
+                    Entries logged
+                  </span>
+                  <span className="font-semibold">
+                    {todaysEmotions?.length}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/70">Dominant mood</span>
-                  <span className="font-semibold">😊 Good</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/70">Streak</span>
-                  <span className="font-semibold">7 days</span>
+                  <span className="text-sm text-foreground/70">
+                    Dominant mood
+                  </span>
+                  <span className="font-semibold">
+                    {getEmojiWithEmotion(
+                      typeof dominatingEmotion === "string"
+                        ? dominatingEmotion
+                        : "sad"
+                    )}{" "}
+                    {dominatingEmotion}
+                  </span>
                 </div>
               </div>
             </Card>
 
             {/* Quick Actions */}
-            <Card className="glass-card p-6">
+            {/* <Card className="glass-card p-6">
               <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start bg-white/30">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  View Analytics
-                </Button>
-                <Button variant="outline" className="w-full justify-start bg-white/30">
+                <Link href={"/view-analytics"}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-white/30"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    View Analytics
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-white/30"
+                >
                   <Calendar className="w-4 h-4 mr-2" />
                   Mood Calendar
                 </Button>
-                <Button variant="outline" className="w-full justify-start bg-white/30">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-white/30"
+                >
                   <Heart className="w-4 h-4 mr-2" />
                   Export Data
                 </Button>
               </div>
-            </Card>
+            </Card> */}
 
             {/* Motivational Quote */}
-            <Card className="glass-card p-6 text-center">
+            {/* <Card className="glass-card p-6 text-center">
               <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <p className="text-sm italic text-foreground/80 mb-2">
-                today my overall emotion is {" "}
-                <span className={getEmotion === "happy"? "text-green-500": getEmotion === "neutral" ?  "text-yellow-500": "text-red-500"}>{getEmotion}</span>
-                
+                today my overall emotion is{" "}
+                <span
+                  className={
+                    getEmotion === "good"
+                      ? "text-green-600"
+                      : getEmotion === "neutral"
+                      ? "text-yellow-500"
+                      : "text-red-500"
+                  }
+                >
+                  {getEmotion}
+                </span>
               </p>
               <p className="text-xs text-foreground/60">- Alan Watts</p>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>
