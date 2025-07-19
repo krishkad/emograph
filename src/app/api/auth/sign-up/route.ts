@@ -49,10 +49,15 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
     const token = jwt.sign(tokenData, process.env.JWT_SECRET as string);
 
-    const response = NextResponse.json({
-      success: true,
-      data: others,
-    });
+    const response = new NextResponse(
+      JSON.stringify({ success: true, data: others }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     response.cookies.set("emograph-token", token, {
       httpOnly: true,

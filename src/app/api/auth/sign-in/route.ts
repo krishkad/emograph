@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 export async function POST(req: NextRequest, res: NextResponse) {
   try {
     const { email, password } = await req.json();
-    console.log({email, password})
+    console.log({ email, password });
 
     if (!email || !password) {
       return NextResponse.json({
@@ -39,7 +39,15 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
     const token = jwt.sign(tokenData, process.env.JWT_SECRET as string);
 
-    const response = NextResponse.json({ success: true, data: others });
+    const response = new NextResponse(
+      JSON.stringify({ success: true, data: others }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     response.cookies.set("emograph-token", token, {
       httpOnly: true,

@@ -11,7 +11,15 @@ export async function GET(req: NextRequest, res: NextResponse) {
       });
     }
 
-    const response = NextResponse.json({ success: true, message: "ok" });
+    const response = new NextResponse(
+      JSON.stringify({ success: true, message: "ok" }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     response.cookies.delete("emograph-token");
 
