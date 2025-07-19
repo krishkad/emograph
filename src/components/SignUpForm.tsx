@@ -62,6 +62,7 @@ export function SignUpForm({
       localStorage.setItem("emograph-user", JSON.stringify(res.data));
       toast.success("acount creation successful");
       router.push("/dashboard");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.warning("failed to create account");
     } finally {

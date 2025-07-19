@@ -33,6 +33,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       message: "ok",
       data: emoNotes,
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return NextResponse.json({
       success: true,

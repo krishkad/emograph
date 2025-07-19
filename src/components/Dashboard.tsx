@@ -216,7 +216,7 @@ const Dashboard = () => {
               {currentEmotion && currentEmotionData && (
                 <div className="text-center mb-6 fade-in">
                   <p className="text-lg font-medium">
-                    You're {currentEmotion} now!
+                    You&apos;re {currentEmotion} now!
                   </p>
                 </div>
               )}
@@ -224,7 +224,7 @@ const Dashboard = () => {
               {/* Text Input */}
               <div className="space-y-4">
                 <label className="block text-sm font-medium">
-                  What's on your mind?
+                  What&apos;s on your mind?
                 </label>
                 <Textarea
                   value={emotionText}
@@ -245,7 +245,7 @@ const Dashboard = () => {
             {/* Today's Entries */}
             <Card className="glass-card p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold">Today's Entries</h3>
+                <h3 className="text-xl font-semibold">Today&apos;s Entries</h3>
                 <Calendar className="w-5 h-5 text-foreground/60" />
               </div>
 
@@ -293,7 +293,7 @@ const Dashboard = () => {
             <Card className="glass-card p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <TrendingUp className="w-5 h-5 mr-2" />
-                Today's Summary
+                Today&apos;s Summary
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">

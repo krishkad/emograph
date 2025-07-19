@@ -60,6 +60,7 @@ export function LoginForm({
       localStorage.setItem("emograph-user", JSON.stringify(res.data));
       toast.success("Login successful");
       router.push("/dashboard");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.warning("failed to login");
     } finally {

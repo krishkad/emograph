@@ -62,6 +62,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
     });
 
     return response;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return NextResponse.json({
       success: false,

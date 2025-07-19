@@ -54,6 +54,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
       data: response?.choices[0].message.content,
       emoNote
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("[DEEPSEEK_ERROR]", error);
     return NextResponse.json({

@@ -16,6 +16,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     response.cookies.delete("emograph-token");
 
     return response;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return NextResponse.json({
       success: false,
