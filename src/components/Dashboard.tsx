@@ -10,12 +10,7 @@ import {
   GetLogTime,
 } from "@/lib/utils";
 import { Emonote } from "@prisma/client";
-import {
-  Calendar,
-  Heart,
-  LogOut,
-  TrendingUp
-} from "lucide-react";
+import { Calendar, Heart, LogOut, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -107,7 +102,9 @@ const Dashboard = () => {
       }
 
       toast.success("logout successful");
-      router.push("/auth/sign-in");
+      Promise.resolve().then(() => {
+        router.push("/auth-sign-in");
+      });
     } catch (error) {
       toast.warning("failed to logout");
     }

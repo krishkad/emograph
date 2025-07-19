@@ -30,8 +30,8 @@ export function LoginForm({
     const localUser = localStorage.getItem("emograph-user");
     if (!localUser) return;
     const user = JSON.parse(localUser);
-    if(!user) return;
-    router.push("/dashboard")
+    if (!user) return;
+    router.replace("/dashboard");
   }, []);
 
   const handleLogIn = async () => {
@@ -59,7 +59,9 @@ export function LoginForm({
 
       localStorage.setItem("emograph-user", JSON.stringify(res.data));
       toast.success("Login successful");
-      router.push("/dashboard");
+      Promise.resolve().then(() => {
+        router.push("/dashboard");
+      });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.warning("failed to login");
